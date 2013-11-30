@@ -18,4 +18,10 @@
 #define KEY_UP 1296
 #define KEY_DOWN 1297
 
+static uint16_t IR_KEYS[] =
+{
+    KEY_BACK, KEY_RESET, KEY_LEFT, KEY_RIGHT, KEY_EDIT, KEY_UP, KEY_DOWN
+};
+
 #endif /* IRCODES_H_ */
+
