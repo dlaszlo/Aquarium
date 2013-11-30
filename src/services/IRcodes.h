@@ -2,7 +2,7 @@
  * IRcodes.h
  *
  *  Created on: 2013.09.02.
- *      Author: Dávid
+ *      Author: Dï¿½vid
  */
 
 #include <stdio.h>

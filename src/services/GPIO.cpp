@@ -8,11 +8,14 @@ GPIO::GPIO()
 {
 	DDRB |= _BV(4) | _BV(3) | _BV(2);
 	DDRD |= _BV(6);
+	DDRD &= _BV(7);
 	PORTB &= ~(_BV(4) | _BV(3) | _BV(2));
 	PORTD &= ~_BV(6);
+	PORTD |= _BV(7);
+
 }
 
-void GPIO::GPIOB2(int state)
+void GPIO::setB2(int state)
 {
 	if (state)
 	{
@@ -24,7 +27,7 @@ void GPIO::GPIOB2(int state)
 	}
 }
 
-void GPIO::GPIOB3(int state)
+void GPIO::setB3(int state)
 {
 	if (state)
 	{
@@ -36,7 +39,7 @@ void GPIO::GPIOB3(int state)
 	}
 }
 
-void GPIO::GPIOB4(int state)
+void GPIO::setB4(int state)
 {
 	if (state)
 	{
@@ -48,7 +51,7 @@ void GPIO::GPIOB4(int state)
 	}
 }
 
-void GPIO::GPIOD6(int state)
+void GPIO::setD6(int state)
 {
 	if (state)
 	{
@@ -58,4 +61,9 @@ void GPIO::GPIOD6(int state)
 	{
 		PORTD &= ~_BV(6);
 	}
+}
+
+uint8_t GPIO::getD7()
+{
+        return PIND & _BV(7);
 }

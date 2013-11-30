@@ -1,17 +1,18 @@
 #ifndef GPIO_H_
 #define GPIO_H_
 
-#define GPIO_ON  1
-#define GPIO_OFF 0
+#define IO_ON  1
+#define IO_OFF 0
 
 class GPIO
 {
 public:
 	GPIO();
-	void GPIOB2(int state);
-	void GPIOB3(int state);
-	void GPIOB4(int state);
-	void GPIOD6(int state);
+	void setB2(int state);
+	void setB3(int state);
+	void setB4(int state);
+	void setD6(int state);
+	uint8_t getD7();
 };
 
 #endif /* GPIO_H_ */

@@ -114,8 +114,8 @@ void setup()
 	context.lcd.init();
 	context.lcd.backlight();
 
-	context.gpio.GPIOB2(1);
-	context.gpio.GPIOB4(1);
+	context.gpio.setB2(1);
+	context.gpio.setB4(1);
 
 	context.pcf8583.get_clock(&context.displayInfo.datetime);
 	if (context.displayInfo.datetime.year == 0)
@@ -170,7 +170,7 @@ ISR(TIMER1_OVF_vect)
 	}
 	if (error)
 	{
-		context.gpio.GPIOD6(t & 1);
+		context.gpio.setD6(t & 1);
 	}
 	t++;
 	t &= 3;
@@ -190,14 +190,8 @@ void loop()
 		if (!context.displayInfo.ir_event)
 		{
 			uint16_t key = results.value & 0x7ff;
-			for (uint8_t i = 0; i < sizeof(IR_KEYS) / sizeof(IR_KEYS[0]); i++)
-			{
-				if (key == IR_KEYS[i])
-				{
-					context.displayInfo.ir_key = key;
-					context.displayInfo.ir_event = 1;
-				}
-			}
+                        context.displayInfo.ir_key = key;
+                        context.displayInfo.ir_event = 1;
 		}
 	}
 	if (lcd_timeout >= 0)
