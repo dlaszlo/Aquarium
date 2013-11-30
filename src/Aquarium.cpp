@@ -38,6 +38,7 @@ volatile uint8_t last_display = 0xff;
 volatile uint8_t current_display = DISPLAY_WELCOME;
 volatile uint8_t error = 0;
 volatile uint8_t t = 0;
+volatile uint8_t keypress = 0;
 
 volatile int lcd_timeout;
 volatile int display_timeout;
@@ -183,17 +184,25 @@ void loop()
 	if (context.ir.decode(&results))
 	{
 		context.ir.resume();
-		cli();
-		lcd_timeout = LCD_TIMEOUT;
-		display_timeout = DISPLAY_TIMEOUT;
-		sei();
-		if (!context.displayInfo.ir_event)
+		if (!keypress)
 		{
-			uint16_t key = results.value & 0x7ff;
-                        context.displayInfo.ir_key = key;
-                        context.displayInfo.ir_event = 1;
+		  keypress = 1;
+                  cli();
+                  lcd_timeout = LCD_TIMEOUT;
+                  display_timeout = DISPLAY_TIMEOUT;
+                  sei();
+                  if (!context.displayInfo.ir_event)
+                  {
+                          uint16_t key = results.value & 0x7ff;
+                          context.displayInfo.ir_key = key;
+                          context.displayInfo.ir_event = 1;
+                  }
 		}
 	}
+	else
+        {
+                keypress = 0;
+        }
 	if (lcd_timeout >= 0)
 	{
 		context.lcd.backlight();

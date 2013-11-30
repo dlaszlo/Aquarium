@@ -22,7 +22,7 @@ uint8_t DisplayMain::action()
 	uint16_t key = context.displayInfo.ir_key;
 	context.displayInfo.ir_event = 0;
 	context.displayInfo.ir_key = 0;
-	if (key == KEY_PLAY_PAUSE)
+	if (key == KEY_EDIT)
 	{
 		return DISPLAY_SETTINGS;
 	}

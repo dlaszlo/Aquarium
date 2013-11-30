@@ -32,21 +32,21 @@ uint8_t DisplaySettings::action()
 	context.displayInfo.ir_key = 0;
 	switch (key)
 	{
-	case KEY_TRACK_NEXT:
+	case KEY_DOWN:
 		selected++;
 		if (selected >= menulength)
 		{
 			selected = 1;
 		}
 		break;
-	case KEY_TRACK_PREV:
+	case KEY_UP:
 		selected--;
 		if (selected <= 0)
 		{
 			selected = menulength - 1;
 		}
 		break;
-	case KEY_PLAY_PAUSE:
+	case KEY_EDIT:
 		context.displayInfo.selected_menu = selected;
 		if (selected == 1)
 		{
@@ -65,7 +65,7 @@ uint8_t DisplaySettings::action()
 			return DISPLAY_SETSILENTHOURS;
 		}
 		break;
-	case KEY_REPEAT:
+	case KEY_BACK:
 		context.displayInfo.selected_menu = 0;
 		return DISPLAY_MAIN;
 	}

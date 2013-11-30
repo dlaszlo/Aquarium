@@ -39,21 +39,21 @@ uint8_t DisplaySetClock::action()
 	context.displayInfo.ir_key = 0;
 	switch (key)
 	{
-	case KEY_TRACK_NEXT:
+	case KEY_RIGHT:
 		field_clock++;
 		if (field_clock > 5)
 		{
 			field_clock = 0;
 		}
 		break;
-	case KEY_TRACK_PREV:
+	case KEY_LEFT:
 		field_clock--;
 		if (field_clock < 0)
 		{
 			field_clock = 5;
 		}
 		break;
-	case KEY_PLUS:
+	case KEY_DOWN:
 		get_time = 0;
 		switch (field_clock)
 		{
@@ -78,7 +78,7 @@ uint8_t DisplaySetClock::action()
 		}
 		context.pcf8583.prepare_time(&pcf8583);
 		break;
-	case KEY_MINUS:
+	case KEY_UP:
 		get_time = 0;
 		switch (field_clock)
 		{
@@ -103,10 +103,10 @@ uint8_t DisplaySetClock::action()
 		}
 		context.pcf8583.prepare_time(&pcf8583);
 		break;
-	case KEY_PLAY_PAUSE:
+	case KEY_EDIT:
 		context.pcf8583.set_clock(&pcf8583);
 		return DISPLAY_SETTINGS;
-	case KEY_REPEAT:
+	case KEY_BACK:
 		return DISPLAY_SETTINGS;
 	}
 	return DISPLAY_SETCLOCK;

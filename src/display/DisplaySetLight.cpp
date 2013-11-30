@@ -37,21 +37,21 @@ uint8_t DisplaySetLight::action()
 	context.displayInfo.ir_key = 0;
 	switch (key)
 	{
-	case KEY_TRACK_NEXT:
+	case KEY_RIGHT:
 		field_light++;
 		if (field_light > 3)
 		{
 			field_light = 0;
 		}
 		break;
-	case KEY_TRACK_PREV:
+	case KEY_LEFT:
 		field_light--;
 		if (field_light < 0)
 		{
 			field_light = 3;
 		}
 		break;
-	case KEY_PLUS:
+	case KEY_DOWN:
 		switch (field_light)
 		{
 		case FIELD_LIGHT_ON_HOUR:
@@ -84,7 +84,7 @@ uint8_t DisplaySetLight::action()
 			break;
 		}
 		break;
-	case KEY_MINUS:
+	case KEY_UP:
 		switch (field_light)
 		{
 		case FIELD_LIGHT_ON_HOUR:
@@ -117,7 +117,7 @@ uint8_t DisplaySetLight::action()
 			break;
 		}
 		break;
-	case KEY_PLAY_PAUSE:
+	case KEY_EDIT:
 		context.settings.light_off_hour = light_off_hour;
 		context.settings.light_on_hour = light_on_hour;
 		context.settings.light_off_minute = light_off_minute;
@@ -125,7 +125,7 @@ uint8_t DisplaySetLight::action()
 		context.ee24lc256.write_eeprom(0, sizeof(context.settings),
 				(uint8_t *) &context.settings);
 		return DISPLAY_SETTINGS;
-	case KEY_REPEAT:
+	case KEY_BACK:
 		return DISPLAY_SETTINGS;
 	}
 	return DISPLAY_SETLIGHT;
