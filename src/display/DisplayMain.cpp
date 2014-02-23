@@ -61,6 +61,12 @@ void DisplayMain::render()
 		dtostrf(context.displayInfo.temperature, 1, 1, tmp);
 		sprintf(txt, "%s~C", tmp);
 		context.lcd.right(1, txt);
+
+		if (context.displayInfo.silent)
+		{
+			context.lcd.setText(0, 0, "#X");
+		}
+
 	}
 }
 

@@ -23,6 +23,16 @@ static const uint8_t charset_1[] PROGMEM =
 		  0b00000,
 		  0b00000};
 
+static const uint8_t charset_2[] PROGMEM =
+		{ 0b00011,
+		  0b00101,
+		  0b11101,
+		  0b10101,
+		  0b11101,
+		  0b00101,
+		  0b00011,
+		  0b00000};
+
 
 // When the display powers up, it is configured as follows:
 //
@@ -62,6 +72,7 @@ void LCD::init_priv()
 	_displayfunction = LCD_4BITMODE | LCD_1LINE | LCD_5x8DOTS;
 	begin(_cols, _rows);
 	createChar(0, charset_1);
+	createChar(1, charset_2);
 
 }
 
@@ -468,6 +479,9 @@ void LCD::show()
 			{
 			case '~':
 				write(0x00);
+				break;
+			case '#':
+				write(0x01);
 				break;
 			case '|':
 				write(0xef);

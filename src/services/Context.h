@@ -20,6 +20,7 @@ typedef struct
 	float temperature;
 	PCF8583_t datetime;
 	uint8_t selected_menu;
+	uint8_t silent;
 } displayInfo_t;
 
 typedef struct

@@ -67,7 +67,7 @@ all: Aquarium.elf secondary-outputs
 Aquarium.elf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: AVR C++ Linker'
-	avr-g++ -Wl,-Map,Aquarium.map,--cref -Wl,--gc-sections -mmcu=atmega328p -o "Aquarium.elf" $(OBJS) $(USER_OBJS) $(LIBS)
+	avr-g++ -Wl,-Map,Aquarium.map,--cref -mrelax -Wl,--gc-sections -Wl,--gc-sections -mmcu=atmega328p -o "Aquarium.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -79,7 +79,7 @@ Aquarium.lss: Aquarium.elf
 
 Aquarium.hex: Aquarium.elf
 	@echo 'Create Flash image (ihex format)'
-	-avr-objcopy -R .eeprom -O ihex Aquarium.elf  "Aquarium.hex"
+	-avr-objcopy -R .eeprom -R .fuse -R .lock -R .signature -O ihex Aquarium.elf  "Aquarium.hex"
 	@echo 'Finished building: $@'
 	@echo ' '
 

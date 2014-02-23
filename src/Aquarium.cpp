@@ -102,6 +102,26 @@ void init_settings()
 	}
 }
 
+void check_silent()
+{
+	context.ee24lc256.read_eeprom(0, sizeof(context.settings),
+			(uint8_t *) &context.settings);
+
+	context.displayInfo.silent = 0;
+	uint16_t silent_start = context.settings.silent_on_hour * 100 + context.settings.silent_on_minute;
+	uint16_t silent_end = context.settings.silent_off_hour * 100 + context.settings.silent_off_minute;
+	uint16_t current_time = context.displayInfo.datetime.hour * 100 + context.displayInfo.datetime.minute;
+
+	if (silent_start < silent_end && current_time >= silent_start && current_time < silent_end)
+	{
+		context.displayInfo.silent = 1;
+	}
+	else if (silent_start > silent_end && (current_time >= silent_start || current_time < silent_end))
+	{
+		context.displayInfo.silent = 1;
+	}
+}
+
 void setup()
 {
 	if (MCUSR & _BV(WDRF))
@@ -114,8 +134,9 @@ void setup()
 	context.lcd.init();
 	context.lcd.backlight();
 
-	context.gpio.setB2(1);
-	context.gpio.setB4(1);
+	context.gpio.setB2(0);
+	context.gpio.setB3(0);
+	context.gpio.setB4(0);
 
 	context.pcf8583.get_clock(&context.displayInfo.datetime);
 	if (context.displayInfo.datetime.year == 0)
@@ -133,6 +154,8 @@ void setup()
 
 	context.displayInfo.ir_event = 0;
 	context.displayInfo.ir_key = 0;
+
+	check_silent();
 
 	current_display = DISPLAY_WELCOME;
 
@@ -222,6 +245,8 @@ void loop()
 	context.pcf8583.get_clock(&context.displayInfo.datetime);
 	float t = context.ds18b20.get_temperature();
 	context.displayInfo.temperature = t;
+
+	check_silent();
 
 	if (current_display != DISPLAY_MAIN)
 	{
