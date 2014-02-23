@@ -63,7 +63,7 @@ uint8_t DisplaySetSilentHours::action()
 			break;
 		case FIELD_SILENT_ON_MINUTE:
 			silent_on_minute++;
-			if (silent_on_minute > 23)
+			if (silent_on_minute > 59)
 			{
 				silent_on_minute = 0;
 			}
@@ -77,7 +77,7 @@ uint8_t DisplaySetSilentHours::action()
 			break;
 		case FIELD_SILENT_OFF_MINUTE:
 			silent_off_minute++;
-			if (silent_off_minute > 23)
+			if (silent_off_minute > 59)
 			{
 				silent_off_minute = 0;
 			}
