@@ -17,6 +17,7 @@
 
 #define LCD_TIMEOUT 20
 #define DISPLAY_TIMEOUT 60
+#define COOLER_OFF_THRESHOLD 0.2
 
 Context context;
 
@@ -38,6 +39,7 @@ volatile uint8_t last_display = 0xff;
 volatile uint8_t current_display = DISPLAY_WELCOME;
 volatile uint8_t error = 0;
 volatile uint8_t t = 0;
+volatile uint8_t keypress = 0;
 
 volatile int lcd_timeout;
 volatile int display_timeout;
@@ -107,19 +109,56 @@ void check_silent()
 	context.ee24lc256.read_eeprom(0, sizeof(context.settings),
 			(uint8_t *) &context.settings);
 
-	context.displayInfo.silent = 0;
 	uint16_t silent_start = context.settings.silent_on_hour * 100 + context.settings.silent_on_minute;
 	uint16_t silent_end = context.settings.silent_off_hour * 100 + context.settings.silent_off_minute;
 	uint16_t current_time = context.displayInfo.datetime.hour * 100 + context.displayInfo.datetime.minute;
 
-	if (silent_start < silent_end && current_time >= silent_start && current_time < silent_end)
+	// silent hours
+	if ((silent_start < silent_end && current_time >= silent_start && current_time < silent_end)
+			|| (silent_start > silent_end && (current_time >= silent_start || current_time < silent_end)))
 	{
 		context.displayInfo.silent = 1;
+		context.displayInfo.cooler = 0;
+		context.displayInfo.light = 0;
+		context.gpio.setB2(0);
+		context.gpio.setB3(0);
+		context.gpio.setB4(0);
 	}
-	else if (silent_start > silent_end && (current_time >= silent_start || current_time < silent_end))
+	else
 	{
-		context.displayInfo.silent = 1;
+		context.displayInfo.silent = 0;
+
+		// cooler
+		if (context.displayInfo.cooler == 0
+				&& context.displayInfo.temperature > context.settings.cooler_temperature)
+		{
+			context.displayInfo.cooler = 1;
+			context.gpio.setB2(1);
+		}
+		else if (context.displayInfo.cooler == 1
+				&& context.displayInfo.temperature < (context.settings.cooler_temperature - COOLER_OFF_THRESHOLD))
+		{
+			context.displayInfo.cooler = 0;
+			context.gpio.setB2(0);
+		}
+
+		// light
+		uint16_t light_start = context.settings.light_on_hour * 100 + context.settings.light_on_minute;
+		uint16_t light_end = context.settings.light_off_hour * 100 + context.settings.light_off_minute;
+		if ((light_start < light_end && current_time >= light_start && current_time < light_end)
+				|| (light_start > light_end && (current_time >= light_start || current_time < light_end)))
+		{
+			context.displayInfo.light = 1;
+			context.gpio.setB3(1);
+		}
+		else
+		{
+			context.displayInfo.light = 0;
+			context.gpio.setB3(0);
+		}
+
 	}
+
 }
 
 void setup()
@@ -134,6 +173,9 @@ void setup()
 	context.lcd.init();
 	context.lcd.backlight();
 
+	context.displayInfo.silent = 1;
+	context.displayInfo.cooler = 0;
+	context.displayInfo.light = 0;
 	context.gpio.setB2(0);
 	context.gpio.setB3(0);
 	context.gpio.setB4(0);
@@ -154,8 +196,6 @@ void setup()
 
 	context.displayInfo.ir_event = 0;
 	context.displayInfo.ir_key = 0;
-
-	check_silent();
 
 	current_display = DISPLAY_WELCOME;
 
@@ -206,32 +246,40 @@ void loop()
 	if (context.ir.decode(&results))
 	{
 		context.ir.resume();
-		cli();
-		lcd_timeout = LCD_TIMEOUT;
-		display_timeout = DISPLAY_TIMEOUT;
-		sei();
-		if (!context.displayInfo.ir_event || !context.gpio.getD7())
+		if (!keypress)
 		{
-			uint16_t key = results.value & 0x7ff;
-			uint8_t f = !context.gpio.getD7();
-			if (!f)
+			keypress = 1;
+			cli();
+			lcd_timeout = LCD_TIMEOUT;
+			display_timeout = DISPLAY_TIMEOUT;
+			sei();
+			if (!context.displayInfo.ir_event || !context.gpio.getD7())
 			{
-				for (uint8_t i = 0; i < sizeof(IR_KEYS) / sizeof(IR_KEYS[0]);
-						i++)
+				uint16_t key = results.value & 0x7ff;
+				uint8_t f = !context.gpio.getD7();
+				if (!f)
 				{
-					if (key == IR_KEYS[i])
+					for (uint8_t i = 0; i < sizeof(IR_KEYS) / sizeof(IR_KEYS[0]);
+							i++)
 					{
-						f = 1;
-						break;
+						if (key == IR_KEYS[i])
+						{
+							f = 1;
+							break;
+						}
 					}
 				}
-			}
-			if (f)
-			{
-				context.displayInfo.ir_key = key;
-				context.displayInfo.ir_event = 1;
+				if (f)
+				{
+					context.displayInfo.ir_key = key;
+					context.displayInfo.ir_event = 1;
+				}
 			}
 		}
+	}
+	else
+	{
+		keypress = 0;
 	}
 	if (lcd_timeout >= 0)
 	{

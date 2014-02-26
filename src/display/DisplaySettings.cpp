@@ -8,7 +8,7 @@
 #include "../services/IRcodes.h"
 
 static const char * menuitems[] =
-{ "*** settings ***", "clock", "cooler", "light", "filter clean", "silent hours" };
+{ "*** settings ***", "clock", "cooler", "light", "silent hours" };
 int8_t selected = 1;
 uint8_t menulength = sizeof(menuitems) / sizeof(menuitems[0]);
 
@@ -60,7 +60,7 @@ uint8_t DisplaySettings::action()
 		{
 			return DISPLAY_SETLIGHT;
 		}
-		else if (selected == 5)
+		else if (selected == 4)
 		{
 			return DISPLAY_SETSILENTHOURS;
 		}

@@ -63,7 +63,7 @@ uint8_t DisplaySetLight::action()
 			break;
 		case FIELD_LIGHT_ON_MINUTE:
 			light_on_minute++;
-			if (light_on_minute > 23)
+			if (light_on_minute > 59)
 			{
 				light_on_minute = 0;
 			}
@@ -77,7 +77,7 @@ uint8_t DisplaySetLight::action()
 			break;
 		case FIELD_LIGHT_OFF_MINUTE:
 			light_off_minute++;
-			if (light_off_minute > 23)
+			if (light_off_minute > 59)
 			{
 				light_off_minute = 0;
 			}

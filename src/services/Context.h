@@ -21,6 +21,8 @@ typedef struct
 	PCF8583_t datetime;
 	uint8_t selected_menu;
 	uint8_t silent;
+	uint8_t cooler;
+	uint8_t light;
 } displayInfo_t;
 
 typedef struct

@@ -66,6 +66,17 @@ void DisplayMain::render()
 		{
 			context.lcd.setText(0, 0, "#X");
 		}
+		else
+		{
+			if (context.displayInfo.cooler)
+			{
+				context.lcd.setText(0, 0, "C");
+			}
+			if (context.displayInfo.light)
+			{
+				context.lcd.setText(1, 0, "L");
+			}
+		}
 
 	}
 }
