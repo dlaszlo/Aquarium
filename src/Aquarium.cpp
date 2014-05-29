@@ -17,7 +17,8 @@
 
 #define LCD_TIMEOUT 20
 #define DISPLAY_TIMEOUT 60
-#define COOLER_OFF_THRESHOLD 0.2
+#define COOLER_TIMEOUT 20
+#define COOLER_OFF_THRESHOLD 0.3
 
 Context context;
 
@@ -43,6 +44,7 @@ volatile uint8_t keypress = 0;
 
 volatile int lcd_timeout;
 volatile int display_timeout;
+volatile int cooler_timeout;
 
 void init_settings()
 {
@@ -64,15 +66,11 @@ void init_settings()
 			|| context.settings.light_off_hour > 23
 			|| context.settings.light_off_hour < 0
 			|| context.settings.light_off_minute > 59
-			|| context.settings.light_off_minute < 0
-			|| (!context.settings.light_on_hour
-					&& !context.settings.light_on_minute
-					&& !context.settings.light_off_hour
-					&& !context.settings.light_off_minute))
+			|| context.settings.light_off_minute < 0)
 	{
-		context.settings.light_on_hour = 7;
+		context.settings.light_on_hour = 20;
 		context.settings.light_on_minute = 0;
-		context.settings.light_off_hour = 20;
+		context.settings.light_off_hour = 7;
 		context.settings.light_off_minute = 0;
 		save_eeprom = 1;
 	}
@@ -84,11 +82,7 @@ void init_settings()
 			|| context.settings.silent_off_hour > 23
 			|| context.settings.silent_off_hour < 0
 			|| context.settings.silent_off_minute > 59
-			|| context.settings.silent_off_minute < 0
-			|| (!context.settings.silent_on_hour
-					&& !context.settings.silent_on_minute
-					&& !context.settings.silent_off_hour
-					&& !context.settings.silent_off_minute))
+			|| context.settings.silent_off_minute < 0)
 	{
 		context.settings.silent_on_hour = 20;
 		context.settings.silent_on_minute = 0;
@@ -108,7 +102,6 @@ void check_silent()
 {
 	context.ee24lc256.read_eeprom(0, sizeof(context.settings),
 			(uint8_t *) &context.settings);
-
 	uint16_t silent_start = context.settings.silent_on_hour * 100 + context.settings.silent_on_minute;
 	uint16_t silent_end = context.settings.silent_off_hour * 100 + context.settings.silent_off_minute;
 	uint16_t current_time = context.displayInfo.datetime.hour * 100 + context.displayInfo.datetime.minute;
@@ -121,8 +114,6 @@ void check_silent()
 		context.displayInfo.cooler = 0;
 		context.displayInfo.light = 0;
 		context.gpio.setB2(0);
-		context.gpio.setB3(0);
-		context.gpio.setB4(0);
 	}
 	else
 	{
@@ -132,33 +123,45 @@ void check_silent()
 		if (context.displayInfo.cooler == 0
 				&& context.displayInfo.temperature > context.settings.cooler_temperature)
 		{
-			context.displayInfo.cooler = 1;
-			context.gpio.setB2(1);
+			cli();
+			if (cooler_timeout == 0)
+			{
+				cooler_timeout = COOLER_TIMEOUT;
+				sei();
+				context.displayInfo.cooler = 1;
+				context.gpio.setB2(1);
+			}
+			sei();
 		}
 		else if (context.displayInfo.cooler == 1
 				&& context.displayInfo.temperature < (context.settings.cooler_temperature - COOLER_OFF_THRESHOLD))
 		{
-			context.displayInfo.cooler = 0;
-			context.gpio.setB2(0);
+			cli();
+			if (cooler_timeout == 0)
+			{
+				cooler_timeout = COOLER_TIMEOUT;
+				sei();
+				context.displayInfo.cooler = 0;
+				context.gpio.setB2(0);
+			}
+			sei();
 		}
-
-		// light
-		uint16_t light_start = context.settings.light_on_hour * 100 + context.settings.light_on_minute;
-		uint16_t light_end = context.settings.light_off_hour * 100 + context.settings.light_off_minute;
-		if ((light_start < light_end && current_time >= light_start && current_time < light_end)
-				|| (light_start > light_end && (current_time >= light_start || current_time < light_end)))
-		{
-			context.displayInfo.light = 1;
-			context.gpio.setB3(1);
-		}
-		else
-		{
-			context.displayInfo.light = 0;
-			context.gpio.setB3(0);
-		}
-
 	}
 
+	// light
+	uint16_t light_start = context.settings.light_on_hour * 100 + context.settings.light_on_minute;
+	uint16_t light_end = context.settings.light_off_hour * 100 + context.settings.light_off_minute;
+	if ((light_start < light_end && current_time >= light_start && current_time < light_end)
+			|| (light_start > light_end && (current_time >= light_start || current_time < light_end)))
+	{
+		context.displayInfo.light = 1;
+		context.gpio.setB3(1);
+	}
+	else
+	{
+		context.displayInfo.light = 0;
+		context.gpio.setB3(0);
+	}
 }
 
 void setup()
@@ -203,6 +206,7 @@ void setup()
 	cli();
 	lcd_timeout = LCD_TIMEOUT;
 	display_timeout = DISPLAY_TIMEOUT;
+	cooler_timeout = 0;
 	TCCR1A = 0;
 	TCCR1B = 0;
 	// TCNT1 = 3036; // 65536 - (16000000 Hz / 256 / 1 Hz)
@@ -230,6 +234,10 @@ ISR(TIMER1_OVF_vect)
 		{
 			display_timeout--;
 		}
+		if (cooler_timeout > 0)
+		{
+			cooler_timeout--;
+		}
 	}
 	if (error)
 	{
@@ -255,7 +263,7 @@ void loop()
 			sei();
 			if (!context.displayInfo.ir_event || !context.gpio.getD7())
 			{
-				uint16_t key = results.value & 0x7ff;
+				uint16_t key = results.value & 0x0ff;
 				uint8_t f = !context.gpio.getD7();
 				if (!f)
 				{

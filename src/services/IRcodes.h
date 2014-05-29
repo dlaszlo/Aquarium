@@ -10,13 +10,13 @@
 #ifndef IRCODES_H_
 #define IRCODES_H_
 
-#define KEY_BACK 1332
-#define KEY_RESET 1330
-#define KEY_LEFT 1313
-#define KEY_RIGHT 1312
-#define KEY_EDIT 1292
-#define KEY_UP 1296
-#define KEY_DOWN 1297
+#define KEY_BACK 3
+#define KEY_RESET 1
+#define KEY_LEFT 4
+#define KEY_RIGHT 6
+#define KEY_EDIT 5
+#define KEY_UP 2
+#define KEY_DOWN 8
 
 static uint16_t IR_KEYS[] =
 {

@@ -8,10 +8,10 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include subdir.mk
 -include src/services/subdir.mk
 -include src/display/subdir.mk
 -include src/subdir.mk
--include subdir.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
@@ -67,7 +67,7 @@ all: Aquarium.elf secondary-outputs
 Aquarium.elf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: AVR C++ Linker'
-	avr-g++ -Wl,-Map,Aquarium.map,--cref -mrelax -Wl,--gc-sections -Wl,--gc-sections -mmcu=atmega328p -o "Aquarium.elf" $(OBJS) $(USER_OBJS) $(LIBS)
+	avr-g++ -Wl,-Map,Aquarium.map,--cref -mrelax -Wl,--gc-sections -Wl,--gc-sections -mmcu=atmega328p -o"Aquarium.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
